@@ -1,0 +1,36 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:15-alpine
+    container_name: finance_db
+    environment:
+      POSTGRES_USER: ${DB_USER:-finance_user}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-finance_password}
+      POSTGRES_DB: ${DB_NAME:-finance_db}
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER:-finance_user} -d ${DB_NAME:-finance_db}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  # Сервис для накатывания миграций (сработает один раз при старте)
+  migrate:
+    image: migrate/migrate:v4.16.2
+    volumes:
+      - ./migrations:/migrations
+    command: [
+      "-path", "/migrations",
+      "-database", "postgres://${DB_USER:-finance_user}:${DB_PASSWORD:-finance_password}@postgres:5432/${DB_NAME:-finance_db}?sslmode=disable",
+      "up"
+    ]
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+volumes:
+  postgres_data:
