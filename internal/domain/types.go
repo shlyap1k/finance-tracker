@@ -91,3 +91,13 @@ type BalanceSnapshot struct {
 	AsOfDate  time.Time
 	CreatedAt time.Time
 }
+
+// SavingsBucket представляет цель накопления
+type SavingsBucket struct {
+	ID            uuid.UUID
+	UserID        uuid.UUID
+	Name          string
+	TargetAmount  decimal.Decimal
+	CurrentAmount decimal.Decimal
+	CreatedAt     time.Time
+}
