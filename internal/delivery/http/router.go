@@ -10,7 +10,7 @@ import (
 )
 
 // SetupRouter настраивает Gin роутер со всеми маршрутами
-func SetupRouter(projectionService *service.ProjectionService) *gin.Engine {
+func SetupRouter(projectionService *service.ProjectionService, authService *service.AuthService) *gin.Engine {
 	r := gin.Default()
 
 	// Публичные маршруты (без аутентификации)
@@ -18,9 +18,17 @@ func SetupRouter(projectionService *service.ProjectionService) *gin.Engine {
 		c.JSON(http.StatusOK, gin.H{"status": "ok"})
 	})
 
+	// Auth endpoints (публичные)
+	authHandler := NewAuthHandler(authService)
+	auth := r.Group("/api/auth")
+	{
+		auth.POST("/register", authHandler.Register)
+		auth.POST("/login", authHandler.Login)
+	}
+
 	// Защищенные маршруты (требуют аутентификации)
 	api := r.Group("/api")
-	api.Use(middleware.AuthMiddleware())
+	api.Use(middleware.JWTAuthMiddleware(authService))
 
 	// Projection endpoints
 	projectionHandler := NewProjectionHandler(projectionService)
@@ -30,15 +38,6 @@ func SetupRouter(projectionService *service.ProjectionService) *gin.Engine {
 		projection.GET("/balance", projectionHandler.GetBalanceProjection)
 		projection.GET("/period-summary", projectionHandler.GetPeriodSummary)
 	}
-
-	// TODO: Добавить остальные группы endpoints
-	// auth := api.Group("/auth")
-	// incomeSources := api.Group("/income-sources")
-	// expenseObligations := api.Group("/expense-obligations")
-	// savingsBuckets := api.Group("/savings-buckets")
-	// savingsRules := api.Group("/savings-rules")
-	// balanceSnapshots := api.Group("/balance-snapshots")
-	// transactions := api.Group("/transactions")
 
 	return r
 }
