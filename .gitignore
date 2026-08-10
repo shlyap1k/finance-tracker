@@ -1,60 +1,44 @@
 ```
-# Go build artifacts
+# Compiled and binary files
+*.pyc
+*.class
 *.o
-*.a
-*.so
-*.dylib
-*.dll
 *.exe
+*.dll
+*.so
+*.a
+*.obj
 *.out
-
-# Go cache and build directories
-vendor/
-*.mod
-*.sum
-!go.mod
-!go.sum
 
 # Dependencies
 node_modules/
 venv/
 .venv/
 __pycache__/
-*.egg-info/
-.Python
-
-# Build directories
-build/
 dist/
+build/
 target/
-bin/
+.gradle/
 
-# Logs
-*.log
-*.out
-
-# Environment
-.env
-.env.local
-*.env.*
-
-# Editors
+# Editor/IDE files
 .vscode/
 .idea/
 *.swp
 *.swo
-*~
+*.tmp
 
-# OS generated files
+# System/Environment files
 .DS_Store
 Thumbs.db
+.env
+.env.local
+*.env.*
 
-# Test and coverage
-.coverage
+# Logs and coverage
+*.log
 coverage/
 htmlcov/
-.pytest_cache/
-.mypy_cache/
+.coverage
 
 # Compressed files
 *.zip
@@ -75,8 +59,4 @@ htmlcov/
 *.Z
 *.lz
 *.lzo
-*.tar.gz
-*.tar.bz2
-*.tar.xz
-*.tar.zst
 ```

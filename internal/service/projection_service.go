@@ -50,7 +50,7 @@ func pgNumericToDecimal(n pgtype.Numeric) (decimal.Decimal, error) {
 // Это интерфейс, чтобы можно было легко мокировать в тестах
 type ProjectionRepository interface {
 	GetLatestSnapshotAtOrBefore(ctx context.Context, userID uuid.UUID, date time.Time) (repository.BalanceSnapshot, error)
-	GetConfirmedTransactionsInRange(ctx context.Context, userID uuid.UUID, from, to time.Time) ([]repository.Transaction, error)
+	GetConfirmedTransactionsInRange(ctx context.Context, params repository.GetConfirmedTransactionsInRangeParams) ([]repository.Transaction, error)
 	GetActiveIncomeSources(ctx context.Context, userID uuid.UUID) ([]repository.GetActiveIncomeSourcesRow, error)
 	GetActiveExpenseObligations(ctx context.Context, userID uuid.UUID) ([]repository.GetActiveExpenseObligationsRow, error)
 	GetActiveSavingsRulesForUser(ctx context.Context, userID uuid.UUID) ([]repository.GetActiveSavingsRulesForUserRow, error)
@@ -93,7 +93,12 @@ func (s *ProjectionService) GetBalanceProjection(
 		factEndDate = today
 	}
 
-	confirmedTxns, err := s.repo.GetConfirmedTransactionsInRange(ctx, userID, pgDateToTime(snapshot.AsOfDate), factEndDate)
+	params := repository.GetConfirmedTransactionsInRangeParams{
+		UserID:    userID,
+		TxnDate:   pgDateToTime(snapshot.AsOfDate),
+		TxnDate_2: factEndDate,
+	}
+	confirmedTxns, err := s.repo.GetConfirmedTransactionsInRange(ctx, params)
 	if err != nil {
 		return domain.BalanceProjection{}, fmt.Errorf("failed to get transactions: %w", err)
 	}
