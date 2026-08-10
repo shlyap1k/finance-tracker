@@ -49,7 +49,7 @@ func pgNumericToDecimal(n pgtype.Numeric) (decimal.Decimal, error) {
 // ProjectionRepository определяет, какие данные нам нужны из БД для расчета прогноза
 // Это интерфейс, чтобы можно было легко мокировать в тестах
 type ProjectionRepository interface {
-	GetLatestSnapshotAtOrBefore(ctx context.Context, userID uuid.UUID, date time.Time) (repository.BalanceSnapshot, error)
+	GetLatestSnapshotAtOrBefore(ctx context.Context, params repository.GetLatestSnapshotAtOrBeforeParams) (repository.BalanceSnapshot, error)
 	GetConfirmedTransactionsInRange(ctx context.Context, params repository.GetConfirmedTransactionsInRangeParams) ([]repository.Transaction, error)
 	GetActiveIncomeSources(ctx context.Context, userID uuid.UUID) ([]repository.GetActiveIncomeSourcesRow, error)
 	GetActiveExpenseObligations(ctx context.Context, userID uuid.UUID) ([]repository.GetActiveExpenseObligationsRow, error)
@@ -82,7 +82,16 @@ func (s *ProjectionService) GetBalanceProjection(
 		snapshotDate = today
 	}
 
-	snapshot, err := s.repo.GetLatestSnapshotAtOrBefore(ctx, userID, snapshotDate)
+	snapshotDatePg := pgtype.Date{
+		Time:  snapshotDate,
+		Valid: true,
+	}
+	paramsSnapshot := repository.GetLatestSnapshotAtOrBeforeParams{
+		UserID:   userID,
+		AsOfDate: snapshotDatePg,
+	}
+
+	snapshot, err := s.repo.GetLatestSnapshotAtOrBefore(ctx, paramsSnapshot)
 	if err != nil {
 		return domain.BalanceProjection{}, fmt.Errorf("failed to get snapshot: %w", err)
 	}
@@ -93,10 +102,20 @@ func (s *ProjectionService) GetBalanceProjection(
 		factEndDate = today
 	}
 
+	// Конвертируем time.Time в pgtype.Date
+	snapshotTxnDatePg := pgtype.Date{
+		Time:  pgDateToTime(snapshot.AsOfDate),
+		Valid: true,
+	}
+	factEndDatePg := pgtype.Date{
+		Time:  factEndDate,
+		Valid: true,
+	}
+
 	params := repository.GetConfirmedTransactionsInRangeParams{
 		UserID:    userID,
-		TxnDate:   pgDateToTime(snapshot.AsOfDate),
-		TxnDate_2: factEndDate,
+		TxnDate:   snapshotTxnDatePg,
+		TxnDate_2: factEndDatePg,
 	}
 	confirmedTxns, err := s.repo.GetConfirmedTransactionsInRange(ctx, params)
 	if err != nil {
