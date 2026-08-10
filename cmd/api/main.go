@@ -52,20 +52,21 @@ func main() {
 
 	// 4. Создаем сервисы
 	projectionService := service.NewProjectionService(repo)
-	
+
 	// Создаем AuthService для регистрации и авторизации
 	// В продакшене секретный ключ и TTL должны храниться в env переменных
 	jwtSecret := os.Getenv("JWT_SECRET")
 	if jwtSecret == "" {
 		jwtSecret = "your-secret-key-change-in-production"
 	}
-	
+
 	jwtTTL := 24 * time.Hour // Токен действует 24 часа
-	
+
 	authService := service.NewAuthService(repo, jwtSecret, jwtTTL)
 
+	rulesService := service.NewRulesService(repo)
 	// 5. Настраиваем роутер
-	router := httpdelivery.SetupRouter(projectionService, authService)
+	router := httpdelivery.SetupRouter(projectionService, authService, rulesService)
 
 	// 6. Запускаем HTTP сервер
 	port := os.Getenv("APP_PORT")

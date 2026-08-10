@@ -3,7 +3,6 @@ package service
 import (
 	"context"
 	"fmt"
-	"math/big"
 
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgtype"
@@ -306,9 +305,9 @@ func (s *RulesService) GetAllSavingsBuckets(ctx context.Context, userID uuid.UUI
 
 // CreateSavingsRuleInput параметры для создания правила накопления
 type CreateSavingsRuleInput struct {
-	BucketID       uuid.UUID       `json:"bucket_id" binding:"required"`
-	Mode           string          `json:"mode" binding:"required,oneof=fixed percent"`
-	Value          decimal.Decimal `json:"value" binding:"required"`
+	BucketID uuid.UUID       `json:"bucket_id" binding:"required"`
+	Mode     string          `json:"mode" binding:"required,oneof=fixed percent"`
+	Value    decimal.Decimal `json:"value" binding:"required"`
 }
 
 // UpdateSavingsRuleInput параметры для обновления правила накопления
@@ -388,11 +387,11 @@ func (s *RulesService) GetAllSavingsRules(ctx context.Context, userID uuid.UUID)
 // ========== Helper functions ==========
 
 func decimalToPgNumeric(d decimal.Decimal) pgtype.Numeric {
-	str := d.String()
-	intVal, _ := new(big.Int).SetString(str, 10)
+	//str := d.String()
+	//intVal, _ := new(big.Int).SetString(str, 10)
 	return pgtype.Numeric{
-		Int:   intVal,
-		Exp:   0,
+		Int:   d.Coefficient(),
+		Exp:   d.Exponent(),
 		Valid: true,
 	}
 }
