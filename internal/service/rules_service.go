@@ -3,6 +3,7 @@ package service
 import (
 	"context"
 	"fmt"
+	"math/big"
 
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgtype"
@@ -27,7 +28,7 @@ func NewRulesService(repo *repository.Queries) *RulesService {
 // CreateIncomeSourceInput параметры для создания источника дохода
 type CreateIncomeSourceInput struct {
 	Name           string          `json:"name" binding:"required"`
-	Amount         decimal.Decimal `json:"amount" binding:"required,gt=0"`
+	Amount         decimal.Decimal `json:"amount" binding:"required"`
 	DayOfMonth     int             `json:"day_of_month" binding:"required,min=1,max=31"`
 	OverflowPolicy string          `json:"overflow_policy" binding:"required,oneof=forward backward"`
 }
@@ -123,7 +124,7 @@ func (s *RulesService) GetAllIncomeSources(ctx context.Context, userID uuid.UUID
 // CreateExpenseObligationInput параметры для создания обязательства по расходам
 type CreateExpenseObligationInput struct {
 	Name           string          `json:"name" binding:"required"`
-	Amount         decimal.Decimal `json:"amount" binding:"required,gt=0"`
+	Amount         decimal.Decimal `json:"amount" binding:"required"`
 	DayOfMonth     int             `json:"day_of_month" binding:"required,min=1,max=31"`
 	OverflowPolicy string          `json:"overflow_policy" binding:"required,oneof=forward backward"`
 }
@@ -307,7 +308,7 @@ func (s *RulesService) GetAllSavingsBuckets(ctx context.Context, userID uuid.UUI
 type CreateSavingsRuleInput struct {
 	BucketID       uuid.UUID       `json:"bucket_id" binding:"required"`
 	Mode           string          `json:"mode" binding:"required,oneof=fixed percent"`
-	Value          decimal.Decimal `json:"value" binding:"required,gt=0"`
+	Value          decimal.Decimal `json:"value" binding:"required"`
 }
 
 // UpdateSavingsRuleInput параметры для обновления правила накопления
@@ -388,11 +389,11 @@ func (s *RulesService) GetAllSavingsRules(ctx context.Context, userID uuid.UUID)
 
 func decimalToPgNumeric(d decimal.Decimal) pgtype.Numeric {
 	str := d.String()
+	intVal, _ := new(big.Int).SetString(str, 10)
 	return pgtype.Numeric{
-		PGnumeric: pgtype.PGnumeric{
-			Int:   []byte(str),
-			Valid: true,
-		},
+		Int:   intVal,
+		Exp:   0,
+		Valid: true,
 	}
 }
 
