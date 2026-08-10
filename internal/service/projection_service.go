@@ -51,8 +51,8 @@ func pgNumericToDecimal(n pgtype.Numeric) (decimal.Decimal, error) {
 type ProjectionRepository interface {
 	GetLatestSnapshotAtOrBefore(ctx context.Context, userID uuid.UUID, date time.Time) (repository.BalanceSnapshot, error)
 	GetConfirmedTransactionsInRange(ctx context.Context, userID uuid.UUID, from, to time.Time) ([]repository.Transaction, error)
-	GetActiveIncomeSources(ctx context.Context, userID uuid.UUID) ([]repository.IncomeSource, error)
-	GetActiveExpenseObligations(ctx context.Context, userID uuid.UUID) ([]repository.ExpenseObligation, error)
+	GetActiveIncomeSources(ctx context.Context, userID uuid.UUID) ([]repository.GetActiveIncomeSourcesRow, error)
+	GetActiveExpenseObligations(ctx context.Context, userID uuid.UUID) ([]repository.GetActiveExpenseObligationsRow, error)
 	GetActiveSavingsRulesForUser(ctx context.Context, userID uuid.UUID) ([]repository.GetActiveSavingsRulesForUserRow, error)
 }
 
@@ -166,8 +166,8 @@ func mapTransactionsToDomain(txns []repository.Transaction) []domain.ProjectedEv
 }
 
 func mapRulesToDomain(
-	incomes []repository.IncomeSource,
-	expenses []repository.ExpenseObligation,
+	incomes []repository.GetActiveIncomeSourcesRow,
+	expenses []repository.GetActiveExpenseObligationsRow,
 	savingsRows []repository.GetActiveSavingsRulesForUserRow,
 ) domain.RulesSet {
 
