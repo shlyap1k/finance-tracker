@@ -2,23 +2,18 @@
 // versions:
 //   sqlc v1.18.0
 // source: rules.sql
-
 package repository
-
 import (
 	"context"
-	"time"
-
+	
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgtype"
 )
-
 const createIncomeSource = `-- name: CreateIncomeSource :one
 INSERT INTO income_sources (user_id, name, amount, day_of_month, overflow_policy)
 VALUES ($1, $2, $3, $4, $5)
 RETURNING id, user_id, name, amount, day_of_month, overflow_policy, archived_at, created_at
 `
-
 type CreateIncomeSourceParams struct {
 	UserID         uuid.UUID      `json:"user_id"`
 	Name           string         `json:"name"`
@@ -26,7 +21,6 @@ type CreateIncomeSourceParams struct {
 	DayOfMonth     int16          `json:"day_of_month"`
 	OverflowPolicy string         `json:"overflow_policy"`
 }
-
 func (q *Queries) CreateIncomeSource(ctx context.Context, arg CreateIncomeSourceParams) (IncomeSource, error) {
 	row := q.db.QueryRow(ctx, createIncomeSource,
 		arg.UserID,
@@ -48,7 +42,6 @@ func (q *Queries) CreateIncomeSource(ctx context.Context, arg CreateIncomeSource
 	)
 	return i, err
 }
-
 const updateIncomeSource = `-- name: UpdateIncomeSource :one
 UPDATE income_sources
 SET name = COALESCE($3, name),
@@ -58,7 +51,6 @@ SET name = COALESCE($3, name),
 WHERE id = $1 AND user_id = $2
 RETURNING id, user_id, name, amount, day_of_month, overflow_policy, archived_at, created_at
 `
-
 type UpdateIncomeSourceParams struct {
 	ID             uuid.UUID      `json:"id"`
 	UserID         uuid.UUID      `json:"user_id"`
@@ -67,7 +59,6 @@ type UpdateIncomeSourceParams struct {
 	DayOfMonth     pgtype.Int2    `json:"day_of_month"`
 	OverflowPolicy pgtype.Text    `json:"overflow_policy"`
 }
-
 func (q *Queries) UpdateIncomeSource(ctx context.Context, arg UpdateIncomeSourceParams) (IncomeSource, error) {
 	row := q.db.QueryRow(ctx, updateIncomeSource,
 		arg.ID,
@@ -90,24 +81,20 @@ func (q *Queries) UpdateIncomeSource(ctx context.Context, arg UpdateIncomeSource
 	)
 	return i, err
 }
-
 const archiveIncomeSource = `-- name: ArchiveIncomeSource :exec
 UPDATE income_sources
 SET archived_at = now()
 WHERE id = $1 AND user_id = $2
 `
-
 func (q *Queries) ArchiveIncomeSource(ctx context.Context, id uuid.UUID, userID uuid.UUID) error {
 	_, err := q.db.Exec(ctx, archiveIncomeSource, id, userID)
 	return err
 }
-
 const getIncomeSourceByID = `-- name: GetIncomeSourceByID :one
 SELECT id, user_id, name, amount, day_of_month, overflow_policy, archived_at, created_at
 FROM income_sources
 WHERE id = $1
 `
-
 func (q *Queries) GetIncomeSourceByID(ctx context.Context, id uuid.UUID) (IncomeSource, error) {
 	row := q.db.QueryRow(ctx, getIncomeSourceByID, id)
 	var i IncomeSource
@@ -123,13 +110,11 @@ func (q *Queries) GetIncomeSourceByID(ctx context.Context, id uuid.UUID) (Income
 	)
 	return i, err
 }
-
 const createExpenseObligation = `-- name: CreateExpenseObligation :one
 INSERT INTO expense_obligations (user_id, name, amount, day_of_month, overflow_policy)
 VALUES ($1, $2, $3, $4, $5)
 RETURNING id, user_id, name, amount, day_of_month, overflow_policy, archived_at, created_at
 `
-
 type CreateExpenseObligationParams struct {
 	UserID         uuid.UUID      `json:"user_id"`
 	Name           string         `json:"name"`
@@ -137,7 +122,6 @@ type CreateExpenseObligationParams struct {
 	DayOfMonth     int16          `json:"day_of_month"`
 	OverflowPolicy string         `json:"overflow_policy"`
 }
-
 func (q *Queries) CreateExpenseObligation(ctx context.Context, arg CreateExpenseObligationParams) (ExpenseObligation, error) {
 	row := q.db.QueryRow(ctx, createExpenseObligation,
 		arg.UserID,
@@ -159,7 +143,6 @@ func (q *Queries) CreateExpenseObligation(ctx context.Context, arg CreateExpense
 	)
 	return i, err
 }
-
 const updateExpenseObligation = `-- name: UpdateExpenseObligation :one
 UPDATE expense_obligations
 SET name = COALESCE($3, name),
@@ -169,7 +152,6 @@ SET name = COALESCE($3, name),
 WHERE id = $1 AND user_id = $2
 RETURNING id, user_id, name, amount, day_of_month, overflow_policy, archived_at, created_at
 `
-
 type UpdateExpenseObligationParams struct {
 	ID             uuid.UUID      `json:"id"`
 	UserID         uuid.UUID      `json:"user_id"`
@@ -178,7 +160,6 @@ type UpdateExpenseObligationParams struct {
 	DayOfMonth     pgtype.Int2    `json:"day_of_month"`
 	OverflowPolicy pgtype.Text    `json:"overflow_policy"`
 }
-
 func (q *Queries) UpdateExpenseObligation(ctx context.Context, arg UpdateExpenseObligationParams) (ExpenseObligation, error) {
 	row := q.db.QueryRow(ctx, updateExpenseObligation,
 		arg.ID,
@@ -201,24 +182,20 @@ func (q *Queries) UpdateExpenseObligation(ctx context.Context, arg UpdateExpense
 	)
 	return i, err
 }
-
 const archiveExpenseObligation = `-- name: ArchiveExpenseObligation :exec
 UPDATE expense_obligations
 SET archived_at = now()
 WHERE id = $1 AND user_id = $2
 `
-
 func (q *Queries) ArchiveExpenseObligation(ctx context.Context, id uuid.UUID, userID uuid.UUID) error {
 	_, err := q.db.Exec(ctx, archiveExpenseObligation, id, userID)
 	return err
 }
-
 const getExpenseObligationByID = `-- name: GetExpenseObligationByID :one
 SELECT id, user_id, name, amount, day_of_month, overflow_policy, archived_at, created_at
 FROM expense_obligations
 WHERE id = $1
 `
-
 func (q *Queries) GetExpenseObligationByID(ctx context.Context, id uuid.UUID) (ExpenseObligation, error) {
 	row := q.db.QueryRow(ctx, getExpenseObligationByID, id)
 	var i ExpenseObligation
@@ -234,19 +211,16 @@ func (q *Queries) GetExpenseObligationByID(ctx context.Context, id uuid.UUID) (E
 	)
 	return i, err
 }
-
 const createSavingsBucket = `-- name: CreateSavingsBucket :one
 INSERT INTO savings_buckets (user_id, name, target_amount)
 VALUES ($1, $2, $3)
 RETURNING id, user_id, name, target_amount, current_amount, created_at
 `
-
 type CreateSavingsBucketParams struct {
 	UserID       uuid.UUID      `json:"user_id"`
 	Name         string         `json:"name"`
 	TargetAmount pgtype.Numeric `json:"target_amount"`
 }
-
 func (q *Queries) CreateSavingsBucket(ctx context.Context, arg CreateSavingsBucketParams) (SavingsBucket, error) {
 	row := q.db.QueryRow(ctx, createSavingsBucket,
 		arg.UserID,
@@ -264,7 +238,6 @@ func (q *Queries) CreateSavingsBucket(ctx context.Context, arg CreateSavingsBuck
 	)
 	return i, err
 }
-
 const updateSavingsBucket = `-- name: UpdateSavingsBucket :one
 UPDATE savings_buckets
 SET name = COALESCE($3, name),
@@ -272,14 +245,12 @@ SET name = COALESCE($3, name),
 WHERE id = $1 AND user_id = $2
 RETURNING id, user_id, name, target_amount, current_amount, created_at
 `
-
 type UpdateSavingsBucketParams struct {
 	ID           uuid.UUID      `json:"id"`
 	UserID       uuid.UUID      `json:"user_id"`
 	Name         pgtype.Text    `json:"name"`
 	TargetAmount pgtype.Numeric `json:"target_amount"`
 }
-
 func (q *Queries) UpdateSavingsBucket(ctx context.Context, arg UpdateSavingsBucketParams) (SavingsBucket, error) {
 	row := q.db.QueryRow(ctx, updateSavingsBucket,
 		arg.ID,
@@ -298,23 +269,19 @@ func (q *Queries) UpdateSavingsBucket(ctx context.Context, arg UpdateSavingsBuck
 	)
 	return i, err
 }
-
 const deleteSavingsBucket = `-- name: DeleteSavingsBucket :exec
 DELETE FROM savings_buckets
 WHERE id = $1 AND user_id = $2
 `
-
 func (q *Queries) DeleteSavingsBucket(ctx context.Context, id uuid.UUID, userID uuid.UUID) error {
 	_, err := q.db.Exec(ctx, deleteSavingsBucket, id, userID)
 	return err
 }
-
 const getSavingsBucketByID = `-- name: GetSavingsBucketByID :one
 SELECT id, user_id, name, target_amount, current_amount, created_at
 FROM savings_buckets
 WHERE id = $1
 `
-
 func (q *Queries) GetSavingsBucketByID(ctx context.Context, id uuid.UUID) (SavingsBucket, error) {
 	row := q.db.QueryRow(ctx, getSavingsBucketByID, id)
 	var i SavingsBucket
@@ -328,13 +295,11 @@ func (q *Queries) GetSavingsBucketByID(ctx context.Context, id uuid.UUID) (Savin
 	)
 	return i, err
 }
-
 const getAllSavingsBucketsByUserID = `-- name: GetAllSavingsBucketsByUserID :many
 SELECT id, user_id, name, target_amount, current_amount, created_at
 FROM savings_buckets
 WHERE user_id = $1
 `
-
 func (q *Queries) GetAllSavingsBucketsByUserID(ctx context.Context, userID uuid.UUID) ([]SavingsBucket, error) {
 	rows, err := q.db.Query(ctx, getAllSavingsBucketsByUserID, userID)
 	if err != nil {
@@ -361,20 +326,17 @@ func (q *Queries) GetAllSavingsBucketsByUserID(ctx context.Context, userID uuid.
 	}
 	return items, nil
 }
-
 const createSavingsRule = `-- name: CreateSavingsRule :one
 INSERT INTO savings_rules (income_source_id, bucket_id, mode, value)
 VALUES ($1, $2, $3, $4)
 RETURNING id, income_source_id, bucket_id, mode, value, created_at
 `
-
 type CreateSavingsRuleParams struct {
 	IncomeSourceID uuid.UUID      `json:"income_source_id"`
 	BucketID       uuid.UUID      `json:"bucket_id"`
 	Mode           string         `json:"mode"`
 	Value          pgtype.Numeric `json:"value"`
 }
-
 func (q *Queries) CreateSavingsRule(ctx context.Context, arg CreateSavingsRuleParams) (SavingsRule, error) {
 	row := q.db.QueryRow(ctx, createSavingsRule,
 		arg.IncomeSourceID,
@@ -393,7 +355,6 @@ func (q *Queries) CreateSavingsRule(ctx context.Context, arg CreateSavingsRulePa
 	)
 	return i, err
 }
-
 const updateSavingsRule = `-- name: UpdateSavingsRule :one
 UPDATE savings_rules
 SET mode = COALESCE($3, mode),
@@ -401,13 +362,11 @@ SET mode = COALESCE($3, mode),
 WHERE id = $1
 RETURNING id, income_source_id, bucket_id, mode, value, created_at
 `
-
 type UpdateSavingsRuleParams struct {
 	ID      uuid.UUID      `json:"id"`
 	Mode    pgtype.Text    `json:"mode"`
 	Value   pgtype.Numeric `json:"value"`
 }
-
 func (q *Queries) UpdateSavingsRule(ctx context.Context, arg UpdateSavingsRuleParams) (SavingsRule, error) {
 	row := q.db.QueryRow(ctx, updateSavingsRule,
 		arg.ID,
@@ -425,23 +384,19 @@ func (q *Queries) UpdateSavingsRule(ctx context.Context, arg UpdateSavingsRulePa
 	)
 	return i, err
 }
-
 const deleteSavingsRule = `-- name: DeleteSavingsRule :exec
 DELETE FROM savings_rules
 WHERE id = $1
 `
-
 func (q *Queries) DeleteSavingsRule(ctx context.Context, id uuid.UUID) error {
 	_, err := q.db.Exec(ctx, deleteSavingsRule, id)
 	return err
 }
-
 const getSavingsRuleByID = `-- name: GetSavingsRuleByID :one
 SELECT id, income_source_id, bucket_id, mode, value, created_at
 FROM savings_rules
 WHERE id = $1
 `
-
 func (q *Queries) GetSavingsRuleByID(ctx context.Context, id uuid.UUID) (SavingsRule, error) {
 	row := q.db.QueryRow(ctx, getSavingsRuleByID, id)
 	var i SavingsRule
@@ -455,7 +410,6 @@ func (q *Queries) GetSavingsRuleByID(ctx context.Context, id uuid.UUID) (Savings
 	)
 	return i, err
 }
-
 const getAllSavingsRulesByUserID = `-- name: GetAllSavingsRulesByUserID :many
 SELECT id, income_source_id, bucket_id, mode, value, created_at
 FROM savings_rules
@@ -463,7 +417,6 @@ WHERE income_source_id IN (
     SELECT id FROM income_sources WHERE user_id = $1
 )
 `
-
 func (q *Queries) GetAllSavingsRulesByUserID(ctx context.Context, userID uuid.UUID) ([]SavingsRule, error) {
 	rows, err := q.db.Query(ctx, getAllSavingsRulesByUserID, userID)
 	if err != nil {

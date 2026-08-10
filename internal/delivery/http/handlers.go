@@ -524,17 +524,11 @@ func (h *RulesHandler) GetAllSavingsRules(c *gin.Context) {
 
 // CreateSavingsRule обрабатывает POST /api/savings-rules
 func (h *RulesHandler) CreateSavingsRule(c *gin.Context) {
-	userID, exists := c.Get("userID")
-	if !exists {
-		c.JSON(http.StatusUnauthorized, gin.H{"error": "user not authenticated"})
-		return
-	}
-
 	var input struct {
 		IncomeSourceID string          `json:"income_source_id" binding:"required"`
 		BucketID       string          `json:"bucket_id" binding:"required"`
 		Mode           string          `json:"mode" binding:"required,oneof=fixed percent"`
-		Value          decimal.Decimal `json:"value" binding:"required,gt=0"`
+		Value          decimal.Decimal `json:"value" binding:"required"`
 	}
 	if err := c.ShouldBindJSON(&input); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid request body", "details": err.Error()})
