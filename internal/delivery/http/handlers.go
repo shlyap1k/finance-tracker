@@ -10,6 +10,58 @@ import (
 	"finance-tracker/internal/service"
 )
 
+// AuthHandler обрабатывает HTTP-запросы для аутентификации
+type AuthHandler struct {
+	authService *service.AuthService
+}
+
+// NewAuthHandler создает новый handler для аутентификации
+func NewAuthHandler(authService *service.AuthService) *AuthHandler {
+	return &AuthHandler{authService: authService}
+}
+
+// Register обрабатывает POST /api/auth/register
+func (h *AuthHandler) Register(c *gin.Context) {
+	var input service.RegisterInput
+	if err := c.ShouldBindJSON(&input); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid request body", "details": err.Error()})
+		return
+	}
+
+	tokens, err := h.authService.Register(c.Request.Context(), input)
+	if err != nil {
+		if err == service.ErrUserAlreadyExists {
+			c.JSON(http.StatusConflict, gin.H{"error": "user with this email already exists"})
+			return
+		}
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to register user"})
+		return
+	}
+
+	c.JSON(http.StatusCreated, tokens)
+}
+
+// Login обрабатывает POST /api/auth/login
+func (h *AuthHandler) Login(c *gin.Context) {
+	var input service.LoginInput
+	if err := c.ShouldBindJSON(&input); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid request body", "details": err.Error()})
+		return
+	}
+
+	tokens, err := h.authService.Login(c.Request.Context(), input)
+	if err != nil {
+		if err == service.ErrInvalidCredentials {
+			c.JSON(http.StatusUnauthorized, gin.H{"error": "invalid email or password"})
+			return
+		}
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to login"})
+		return
+	}
+
+	c.JSON(http.StatusOK, tokens)
+}
+
 // ProjectionHandler обрабатывает HTTP-запросы для прогноза баланса
 type ProjectionHandler struct {
 	projectionService *service.ProjectionService

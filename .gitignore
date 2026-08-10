@@ -10,8 +10,6 @@
 
 # Dependencies
 vendor/
-*.mod
-*.sum
 
 # Logs and temp files
 *.log
@@ -22,17 +20,8 @@ vendor/
 .vscode/
 .idea/
 
-# Coverage
-coverage/
-htmlcov/
-.coverage
-
 # Environment
 .env
 .env.local
-*.env.*
-
-# OS generated files
-.DS_Store
-Thumbs.db
+.env.*
 ```
