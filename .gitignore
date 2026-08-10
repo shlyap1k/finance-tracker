@@ -1,1 +1,11 @@
-Nothing needs to be added to the .gitignore file based on the provided changes. The listed files are all Go source code files and SQL files, which should be tracked in version control. There are no build artifacts, dependencies, temporary files, or other items that need to be ignored in the provided change list.
+# Script-specific temporary files
+*.tmp
+*.log
+
+# Backup files
+*~
+
+# Environment variables
+.env
+.env.local
+.env.*
